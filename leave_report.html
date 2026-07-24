@@ -16,8 +16,18 @@
 
 
 <style>
-  html, body { margin: 0; padding: 0; background: #FFFFFF; }
-  #root { min-height: 100vh; }
+  html, body {
+    margin: 0; padding: 0; background: #FFFFFF;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+  #root {
+    min-height: 100%;
+    min-height: 100dvh;
+  }
 </style>
 </head>
 <body>
@@ -1077,7 +1087,7 @@ function LeaveReportScroll() {
     <div
       className="app-root"
       style={{
-        minHeight: "100vh", background: C.bg,
+        minHeight: "100svh", background: C.bg,
         fontFamily: FONT, paddingBottom: 40,
       }}
     >
