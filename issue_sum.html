@@ -118,6 +118,19 @@
   .pri-row{ display:grid; grid-template-columns:1fr; gap:16px; }
   @media(min-width:768px){ .pri-row{ grid-template-columns:1fr 1fr; } }
   .pri-title{ font-size:14px; font-weight:700; margin:0 0 16px; }
+
+  /* parameter panel */
+  .param-grid{ display:flex; flex-direction:column; gap:16px; }
+  .param-card-title{ font-size:15px; font-weight:700; margin:0 0 4px; display:flex; align-items:center; gap:8px; }
+  .param-card-desc{ font-size:13px; color:var(--muted); margin:0 0 16px; line-height:1.6; }
+  .param-formula{ font-family:'IBM Plex Mono',monospace; font-size:13px; background:#F8FAFD; border:1px solid var(--line); border-radius:10px; padding:14px 16px; color:var(--ink); line-height:1.7; overflow-x:auto; margin-bottom:16px; }
+  .param-step{ font-size:13px; color:var(--ink); margin:0 0 6px; padding-left:18px; position:relative; }
+  .param-step::before{ content:"→"; position:absolute; left:0; color:var(--magenta); font-weight:700; }
+  .param-table{ width:100%; border-collapse:collapse; font-size:13px; margin-top:12px; }
+  .param-table th{ text-align:left; padding:8px 12px; font-size:11px; font-weight:600; color:#64748B; background:#F4F6FB; white-space:nowrap; }
+  .param-table td{ padding:8px 12px; border-top:1px solid var(--line2); }
+  .param-two-col{ display:grid; grid-template-columns:1fr; gap:16px; }
+  @media(min-width:1024px){ .param-two-col{ grid-template-columns:1fr 1fr; } }
   .pri-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
   .pri-cell{ border-radius:12px; padding:12px; text-align:center; }
   .pri-num{ font-weight:700; font-size:22px; }
@@ -208,8 +221,9 @@
       <div class="pillrow" id="quarterPills"><span class="pillrow-label">QUARTER</span></div>
     </div>
 
+    <div id="dashboardPanel">
     <div class="score-row">
-      <div class="card p5 score-card" id="overallScoreCard"></div>
+    <div class="card p5 score-card" id="overallScoreCard"></div>
       <div class="card p5" id="quarterlyScoreCard"></div>
     </div>
 
@@ -266,6 +280,9 @@
         <button class="btn-loadmore" id="loadMoreBtn" onclick="loadMore()"></button>
       </div>
     </div>
+    </div><!-- /#dashboardPanel -->
+
+    <div id="parameterPanel" style="display:none;"></div>
 
     <div style="display:flex; align-items:center; justify-content:center; gap:14px; padding-top:4px;">
       <img src="" id="footerLogoHcaja" alt="HCaja" style="height:18px; width:auto; opacity:0.85;" />
@@ -292,10 +309,10 @@ const WEIGHTS = { Critical:0.4, High:0.3, Medium:0.2, Low:0.1 };
 const MONTHS_ID = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
 
 const SLA_PARAMS = {
-  Critical:[{max:0.2,score:5},{max:0.41,score:4},{max:1,score:3},{max:2,score:2},{max:999,score:1}],
-  High:[{max:2,score:5},{max:3,score:4},{max:5,score:3},{max:7,score:2},{max:999,score:1}],
-  Medium:[{max:3,score:5},{max:5,score:4},{max:10,score:3},{max:15,score:2},{max:999,score:1}],
-  Low:[{max:5,score:5},{max:10,score:4},{max:20,score:3},{max:30,score:2},{max:999,score:1}],
+  Critical:[{max:0.2,score:5,label:"Ideal"},{max:0.41,score:4,label:"Cukup Baik"},{max:1,score:3,label:"Terlalu Lama"},{max:2,score:2,label:"Buruk"},{max:999,score:1,label:"Sangat Buruk"}],
+  High:[{max:2,score:5,label:"Ideal"},{max:3,score:4,label:"Cukup Baik"},{max:5,score:3,label:"Terlalu Lama"},{max:7,score:2,label:"Buruk"},{max:999,score:1,label:"Sangat Buruk"}],
+  Medium:[{max:3,score:5,label:"Ideal"},{max:5,score:4,label:"Cukup Baik"},{max:10,score:3,label:"Terlalu Lama"},{max:15,score:2,label:"Buruk"},{max:999,score:1,label:"Sangat Buruk"}],
+  Low:[{max:5,score:5,label:"Ideal"},{max:10,score:4,label:"Cukup Baik"},{max:20,score:3,label:"Terlalu Lama"},{max:30,score:2,label:"Buruk"},{max:999,score:1,label:"Sangat Buruk"}],
 };
 
 /* ============================================================
@@ -438,6 +455,7 @@ function overallScoreCalc(rowsYear){
 let rawRows = [];
 let years = [];
 let state = {
+  viewMode:"dashboard", // "dashboard" | "parameter"
   selectedYear:null, selectedQuarter:"All",
   tableTab:"outstanding", search:"", modulFilter:"All", visibleCount:25,
 };
@@ -495,18 +513,26 @@ function renderPills(){
   const periodLabel = state.selectedQuarter==="All"
     ? `Tahun ${state.selectedYear ?? "-"}`
     : `Q${state.selectedQuarter} ${state.selectedYear ?? "-"}`;
-  document.getElementById("heroSub").textContent = `Log HCaja Issue Tracking — ${periodLabel}`;
+  document.getElementById("heroSub").textContent = state.viewMode==="parameter"
+    ? "Log HCaja Issue Tracking — Parameter & Rumus Penilaian"
+    : `Log HCaja Issue Tracking — ${periodLabel}`;
 
   const yWrap = document.getElementById("yearPills");
   yWrap.innerHTML = '<span class="pillrow-label">TAHUN</span>';
   years.forEach(y=>{
     const el = document.createElement("div");
-    el.className = "pill" + (state.selectedYear===y ? " active" : "");
+    el.className = "pill" + (state.viewMode==="dashboard" && state.selectedYear===y ? " active" : "");
     el.textContent = y;
-    el.onclick = ()=>{ state.selectedYear=y; state.selectedQuarter="All"; state.visibleCount=25; renderAll(); };
+    el.onclick = ()=>{ state.viewMode="dashboard"; state.selectedYear=y; state.selectedQuarter="All"; state.visibleCount=25; renderAll(); };
     yWrap.appendChild(el);
   });
+  const paramEl = document.createElement("div");
+  paramEl.className = "pill" + (state.viewMode==="parameter" ? " active" : "");
+  paramEl.textContent = "Parameter";
+  paramEl.onclick = ()=>{ state.viewMode="parameter"; renderAll(); };
+  yWrap.appendChild(paramEl);
 
+  document.getElementById("quarterPills").style.display = state.viewMode==="parameter" ? "none" : "flex";
   const qWrap = document.getElementById("quarterPills");
   qWrap.innerHTML = '<span class="pillrow-label">QUARTER</span>';
   ["All",1,2,3,4].forEach(q=>{
@@ -819,12 +845,122 @@ function loadMore(){ state.visibleCount += 25; renderTable(); }
    ============================================================ */
 function renderAll(){
   renderPills();
+
+  const dashPanel = document.getElementById("dashboardPanel");
+  const paramPanel = document.getElementById("parameterPanel");
+
+  if(state.viewMode==="parameter"){
+    dashPanel.style.display = "none";
+    paramPanel.style.display = "block";
+    renderParameterPanel();
+    return;
+  }
+  dashPanel.style.display = "block";
+  paramPanel.style.display = "none";
+
   renderScoreCards();
   renderKpis();
   renderPriority();
   renderCharts();
   renderTableControls();
   renderTable();
+}
+
+/* ============================================================
+   RENDER: PARAMETER PANEL (documentation, auto-generated from
+   the same constants used for the real calculations, so it can
+   never drift out of sync with what the dashboard actually does)
+   ============================================================ */
+function scoreScaleRows(){
+  return [
+    { range:"0.00 – 0.99", ...scoreLabel(0.5) },
+    { range:"1.00 – 1.99", ...scoreLabel(1.5) },
+    { range:"2.00 – 2.99", ...scoreLabel(2.5) },
+    { range:"3.00 – 3.99", ...scoreLabel(3.5) },
+    { range:"4.00 – 5.00", ...scoreLabel(4.5) },
+  ];
+}
+function renderParameterPanel(){
+  const weightRows = PRIORITIES.map(p=>`
+    <tr>
+      <td><span class="badge" style="background:${PRI_COLOR[p]}17;color:${PRI_COLOR[p]};">${p}</span></td>
+      <td class="mono">${Math.round(WEIGHTS[p]*100)}%</td>
+    </tr>`).join("");
+
+  const scaleRows = scoreScaleRows().map(r=>`
+    <tr>
+      <td class="mono">${r.range}</td>
+      <td><span style="color:${r.tone}; font-weight:700;">${r.id}</span></td>
+      <td style="color:#94A3B8;">${r.en}</td>
+    </tr>`).join("");
+
+  const slaRows = PRIORITIES.map(p=>{
+    const table = SLA_PARAMS[p];
+    return table.map((row,i)=>{
+      const prevMax = i===0 ? 0 : table[i-1].max;
+      const rangeTxt = row.max>=999 ? `&gt; ${prevMax} hari` : `${prevMax === 0 ? "0" : "&gt; "+prevMax} – ${row.max} hari`;
+      return `
+        <tr>
+          ${i===0 ? `<td rowspan="${table.length}"><span class="badge" style="background:${PRI_COLOR[p]}17;color:${PRI_COLOR[p]};">${p}</span></td>` : ""}
+          <td class="mono">${rangeTxt}</td>
+          <td class="mono" style="text-align:center;">${row.score}</td>
+          <td>${row.label}</td>
+        </tr>`;
+    }).join("");
+  }).join("");
+
+  document.getElementById("parameterPanel").innerHTML = `
+    <div class="param-grid">
+
+      <div class="card p5">
+        <p class="param-card-title">📐 Rumus Penilaian Overall (per Tahun)</p>
+        <p class="param-card-desc">Overall dihitung sebagai <b>rata-rata Score Final dari tiap quarter yang sudah punya data</b> di tahun tersebut. Quarter yang belum ada issue sama sekali (mis. Q4 yang belum berjalan) di-<b>skip</b>, tidak ikut dibagi.</p>
+        <div class="param-formula">Overall Score = Σ (Quarterly Score tiap quarter yang ada data) ÷ jumlah quarter yang ada data</div>
+        <p class="param-step">Step 1 — Hitung Quarterly Score untuk tiap quarter (lihat rumus Quarterly di bawah)</p>
+        <p class="param-step">Step 2 — Ambil hanya quarter yang minimal punya 1 issue</p>
+        <p class="param-step">Step 3 — Rata-ratakan Quarterly Score dari quarter-quarter tersebut</p>
+      </div>
+
+      <div class="card p5">
+        <p class="param-card-title">📐 Rumus Penilaian Quarterly (per Q1/Q2/Q3/Q4)</p>
+        <p class="param-card-desc">Dihitung dari rata-rata Score issue berstatus <b>Done</b> pada quarter tersebut, dikelompokkan per Priority, lalu dijumlah berbobot.</p>
+        <div class="param-formula">Avg(Priority) = AVERAGEIFS(Score, Priority = X, Quarter = Q, Status = "Done")<br/>Quarterly Score = Σ (Avg(Priority) × Bobot Priority)</div>
+        <p class="param-step">Kalau di quarter tsb belum ada issue Done untuk priority tertentu → Avg default = 5 (dianggap ideal / belum ada masalah tercatat)</p>
+        <table class="param-table">
+          <thead><tr><th>Priority</th><th>Bobot</th></tr></thead>
+          <tbody>${weightRows}</tbody>
+        </table>
+      </div>
+
+      <div class="param-two-col">
+        <div class="card p5">
+          <p class="param-card-title">🎯 Skala Penilaian (Score → Label)</p>
+          <p class="param-card-desc">Score Final (Overall maupun Quarterly) selalu dalam rentang 0–5, dipetakan ke label berikut:</p>
+          <table class="param-table">
+            <thead><tr><th>Rentang Score</th><th>Label (ID)</th><th>Label (EN)</th></tr></thead>
+            <tbody>${scaleRows}</tbody>
+          </table>
+        </div>
+
+        <div class="card p5">
+          <p class="param-card-title">⏱️ SLA Parameter (Score per Issue)</p>
+          <p class="param-card-desc">Tiap issue dapat Score 1–5 berdasarkan Priority dan lamanya penyelesaian (Solve Date − Raised Date, dalam hari):</p>
+          <table class="param-table">
+            <thead><tr><th>Priority</th><th>Lamanya Issue</th><th style="text-align:center;">Score</th><th>Rating</th></tr></thead>
+            <tbody>${slaRows}</tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card p5">
+        <p class="param-card-title">ℹ️ Catatan Umum</p>
+        <p class="param-step">Status <b>HOLD</b> dikecualikan dari seluruh perhitungan (Overall, Quarterly, KPI, chart, tabel)</p>
+        <p class="param-step">Hanya issue berstatus <b>Done</b> yang dihitung ke dalam rata-rata Score per Priority</p>
+        <p class="param-step">Kalau kolom Score di sheet kosong, sistem otomatis hitung dari tabel SLA Parameter di atas (Priority × Lamanya Issue)</p>
+        <p class="param-step">Nilai Score per issue dibatasi 1–5; kalau data di sheet keluar dari rentang itu, otomatis dihitung ulang dari SLA Parameter</p>
+      </div>
+
+    </div>`;
 }
 
 window.__libsReady
