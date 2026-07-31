@@ -12,19 +12,49 @@
   <link rel="stylesheet" href="hcaja-shared.css">
   
   <style>
-    /* Login Screen */
+    /* Login Screen - Premium Design dengan HCaja Brand */
     #login-screen {
       position: fixed;
       inset: 0;
       z-index: 1000;
-      background:
-        radial-gradient(circle at 15% 20%, rgba(233, 30, 140, 0.1), transparent 45%),
-        radial-gradient(circle at 85% 80%, rgba(244, 96, 12, 0.08), transparent 45%),
-        linear-gradient(160deg, #061B3D 0%, #00428D 55%, #0A2E63 100%);
+      background: linear-gradient(135deg, #E91E8C 0%, #F4600C 25%, #E91E8C 50%, #F4600C 75%, #E91E8C 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
       display: flex;
       align-items: center;
       justify-content: center;
       transition: opacity 0.35s ease, visibility 0.35s ease;
+      overflow: hidden;
+    }
+
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    /* Decorative shapes */
+    #login-screen::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 500px;
+      height: 500px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      filter: blur(80px);
+    }
+
+    #login-screen::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      left: -10%;
+      width: 400px;
+      height: 400px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 50%;
+      filter: blur(60px);
     }
 
     #login-screen.hidden {
@@ -35,13 +65,14 @@
 
     .login-card {
       background: var(--paper);
-      border-radius: 14px;
-      padding: 38px 34px 30px;
-      box-shadow: 0 24px 70px rgba(0, 10, 40, 0.35);
-      max-width: 380px;
+      border-radius: 20px;
+      padding: 45px 40px 35px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+      max-width: 420px;
       width: 92%;
       text-align: center;
       position: relative;
+      z-index: 10;
     }
 
     .login-card::before {
@@ -50,37 +81,31 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 4px;
-      border-radius: 14px 14px 0 0;
-      background: linear-gradient(90deg, var(--navy), var(--magenta), var(--orange));
+      height: 5px;
+      border-radius: 20px 20px 0 0;
+      background: linear-gradient(90deg, var(--navy) 0%, var(--magenta) 50%, var(--orange) 100%);
     }
 
     .brand-mark {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 9px;
-      margin-bottom: 6px;
+      margin-bottom: 12px;
     }
 
-    .brand-mark .hc {
-      font-size: 22px;
-      font-weight: 800;
-      color: var(--navy);
-      letter-spacing: -0.3px;
-    }
-
-    .brand-mark .hc span {
-      color: var(--magenta);
+    .brand-mark img {
+      height: 60px;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.1));
     }
 
     .brand-sub {
-      font-size: 10.5px;
+      font-size: 11px;
       color: var(--muted);
-      letter-spacing: 1.2px;
+      letter-spacing: 1.5px;
       text-transform: uppercase;
-      margin: 0 0 22px;
-      font-weight: 600;
+      margin: 0 0 28px;
+      font-weight: 700;
     }
 
     .lock-icon {
@@ -324,8 +349,10 @@
 <!-- LOGIN SCREEN -->
 <div id="login-screen">
   <div class="login-card">
-    <div class="brand-mark"><span class="hc">HCaja<span>.</span></span></div>
-    <p class="brand-sub">HCIS · PT Tri Adi Bersama</p>
+    <div class="brand-mark">
+      <img src="3_HCaja_344_x_201.png" alt="HCaja Logo" />
+    </div>
+    <p class="brand-sub">HCIS · Powered by EKSAD</p>
 
     <div class="lock-icon">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -416,7 +443,7 @@
 <script>
   // Initialize HCaja Auth
   HCajaAuth.init({
-    passwordHash: '09db4543b26033fab5f872e5be8886d49e08eaeb2697e83b79b7a65394a390c0',
+    passwordHash: 'f92b9e51e7eb6f23e893a8b7abb6e66ed71dc4e9b99f1e4a1cea43f2c6e03c98',
     sessionSecret: 'ed1068cb08e146daa58613083eda8899abb8a2c7a3c54347af53773d7168ec90'
   });
 
@@ -541,7 +568,7 @@
     }
   });
 
-  // Security: Prevent common attacks
+  // Security: Prevent common attacks (disable DevTools opening)
   document.addEventListener('contextmenu', e => e.preventDefault());
   document.addEventListener('keydown', function(e) {
     if (e.key === 'F12' ||
@@ -550,9 +577,6 @@
       e.preventDefault();
     }
   });
-
-  console.log('%cSTOP', 'color:#DC2626;font-size:40px;font-weight:bold;');
-  console.log('%cHalaman ini berisi data internal HCIS PT Tri Adi Bersama. Akses tidak sah dilarang.', 'font-size:13px;');
 
   // Boot application
   boot();
