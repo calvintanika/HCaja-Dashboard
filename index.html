@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HCIS Dashboard Hub — HCaja | Anteraja</title>
+  <link rel="icon" href="data:,">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Shared Styles -->
+  <link rel="stylesheet" href="hcaja-shared.css">
+  
+  <style>
+    /* Login Screen - Background Image */
+    #login-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background-image: url('5_HCaja_2732_x_1341.png');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+      overflow: hidden;
+    }
+
+    #login-screen::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 1;
+    }
+
+    #login-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .login-card {
+      background: var(--paper);
+      border-radius: 20px;
+      padding: 45px 40px 35px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+      max-width: 420px;
+      width: 92%;
+      text-align: center;
+      position: relative;
+      z-index: 10;
+    }
+
+    .login-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      border-radius: 20px 20px 0 0;
+      background: linear-gradient(90deg, var(--navy) 0%, var(--magenta) 50%, var(--orange) 100%);
+    }
+
+    .brand-mark {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+
+    .brand-mark img {
+      height: 60px;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.1));
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin: 0 0 28px;
+      font-weight: 700;
+    }
+
+    .lock-icon {
+      width: 46px;
+      height: 46px;
+      margin: 0 auto 14px;
+      border-radius: 50%;
+      background: var(--navy-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lock-icon svg {
+      width: 22px;
+      height: 22px;
+      color: var(--navy);
+    }
+
+    .login-card h2 {
+      margin: 0 0 6px;
+      font-size: 16.5px;
+    }
+
+    .login-card p.desc {
+      margin: 0 0 22px;
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .password-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .toggle-eye {
+      position: absolute;
+      right: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: var(--muted);
+      background: none;
+      border: none;
+      padding: 4px;
+      display: flex;
+    }
+
+    .toggle-eye svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .login-footer {
+      margin-top: 20px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+      font-size: 10.5px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .login-footer strong {
+      color: var(--navy);
+    }
+
+    /* Dashboard */
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    #app.locked header,
+    #app.locked nav.tabbar,
+    #app.locked .content {
+      filter: blur(6px);
+      opacity: 0.55;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    header,
+    nav.tabbar,
+    .content {
+      transition: filter 0.25s ease, opacity 0.25s ease;
+    }
+
+    header {
+      background: var(--paper);
+      border-bottom: 1px solid var(--line);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      box-shadow: 0 1px 3px rgba(17, 24, 39, 0.04);
+    }
+
+    header .logo-mark {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    header .logo-mark .hc {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--navy);
+      letter-spacing: -0.3px;
+    }
+
+    header .logo-mark .hc span {
+      color: var(--magenta);
+    }
+
+    header .titles {
+      margin-right: auto;
+    }
+
+    header .titles h1 {
+      font-size: 15px;
+    }
+
+    header .titles p {
+      margin: 1px 0 0;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    header .badge {
+      font-size: 10px;
+    }
+
+    header .logout-btn {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: #fff;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      padding: 6px 12px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    header .logout-btn:hover {
+      border-color: var(--navy);
+      color: var(--navy);
+    }
+
+    header .logout-btn svg {
+      width: 13px;
+      height: 13px;
+    }
+
+    nav.tabbar {
+      background: var(--paper);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      gap: 4px;
+      padding: 0 20px;
+      overflow-x: auto;
+    }
+
+    nav.tabbar button {
+      appearance: none;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      padding: 12px 16px;
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    nav.tabbar button svg {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+    }
+
+    nav.tabbar button:hover {
+      color: var(--ink);
+    }
+
+    nav.tabbar button.active {
+      color: var(--navy);
+      border-bottom-color: var(--magenta);
+    }
+
+    .content {
+      flex: 1;
+      position: relative;
+      min-height: 0;
+    }
+
+    .pane {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.12s;
+    }
+
+    .pane.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .pane iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+      background: #fff;
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="brand-mark">
+      <img src="3_HCaja_344_x_201.png" alt="HCaja Logo" />
+    </div>
+    <p class="brand-sub">HCIS · Powered by EKSAD</p>
+
+    <div class="lock-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+    </div>
+
+    <h2>Akses Dashboard Hub</h2>
+    <p class="desc">Dashboard ini berisi data internal HCIS.<br/>Masukkan password untuk melanjutkan.</p>
+
+    <form class="password-form" id="password-form" autocomplete="off">
+      <div class="input-wrap">
+        <input type="password" id="password-input" placeholder="Masukkan password..." autocomplete="off" autofocus />
+        <button type="button" class="toggle-eye" id="toggle-eye" tabindex="-1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
+      <button type="submit" id="submit-btn" class="primary">Masuk ke Dashboard</button>
+      <div class="status-msg" id="status-msg"></div>
+    </form>
+
+    <div class="login-footer">
+      🔒 Akses dicatat dan dibatasi per sesi browser.<br/>
+      Hubungi <strong>Tim HCIS</strong> jika lupa password.
+    </div>
+  </div>
+</div>
+
+<!-- MAIN DASHBOARD -->
+<div id="app" class="locked">
+  <header>
+    <div class="logo-mark"><span class="hc">HCaja<span>.</span></span></div>
+    <div class="titles">
+      <h1>HCIS Dashboard Hub</h1>
+      <p>PT Tri Adi Bersama (Anteraja) — pilih dashboard di bawah</p>
+    </div>
+    <span class="badge">HCIS · HCaja</span>
+    <button class="logout-btn" id="logout-btn" title="Keluar dari sesi">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      Keluar
+    </button>
+  </header>
+
+  <nav class="tabbar" id="tabbar">
+    <button class="tab-btn active" data-target="leave">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      Leave Report
+    </button>
+    <button class="tab-btn" data-target="issue">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      Support Ticket
+    </button>
+  </nav>
+
+  <div class="content">
+    <div class="pane active" id="pane-leave">
+      <div class="loading" id="loading-leave"><div class="spinner"></div>Memuat Leave Report…</div>
+      <iframe id="frame-leave" src="leave_report.html" title="HCaja Leave Report"></iframe>
+    </div>
+    <div class="pane" id="pane-issue">
+      <div class="loading" id="loading-issue"><div class="spinner"></div>Memuat Support Ticket Dashboard…</div>
+      <iframe id="frame-issue" title="HCIS Support Ticket Dashboard"></iframe>
+    </div>
+  </div>
+</div>
+
+<!-- Auth Library -->
+<script src="hcaja-auth.js"></script>
+
+<!-- Main Application -->
+<script>
+  // Initialize HCaja Auth
+  HCajaAuth.init({
+    passwordHash: '09db4543b26033fab5f872e5be8886d49e08eaeb2697e83b79b7a65394a390c0',
+    sessionSecret: 'ed1068cb08e146daa58613083eda8899abb8a2c7a3c54347af53773d7168ec90'
+  });
+
+  // UI Elements
+  const loginScreen = document.getElementById('login-screen');
+  const app = document.getElementById('app');
+  const form = document.getElementById('password-form');
+  const input = document.getElementById('password-input');
+  const status = document.getElementById('status-msg');
+  const card = document.querySelector('.login-card');
+  const submitBtn = document.getElementById('submit-btn');
+
+  // Boot: Check existing session
+  async function boot() {
+    if (await HCajaAuth.checkSession()) {
+      unlockDashboard();
+    } else {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('blocked') === '1') {
+        status.className = 'status-msg warn';
+        status.textContent = 'Sesi tidak valid — silakan login kembali.';
+      }
+    }
+  }
+
+  function unlockDashboard() {
+    loginScreen.classList.add('hidden');
+    app.classList.remove('locked');
+  }
+
+  // Form Submit
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    submitBtn.disabled = true;
+
+    const password = input.value;
+    input.value = '';
+
+    const result = await HCajaAuth.validatePassword(password);
+
+    if (result.locked) {
+      status.className = 'status-msg warn';
+      const seconds = Math.ceil(result.remainingMs / 1000);
+      let countdown = seconds;
+
+      const timer = setInterval(() => {
+        if (countdown <= 0) {
+          clearInterval(timer);
+          status.textContent = '';
+          submitBtn.disabled = false;
+          input.disabled = false;
+        } else {
+          status.textContent = `Terlalu banyak percobaan. Coba lagi dalam ${countdown} detik.`;
+          countdown--;
+        }
+      }, 1000);
+
+      input.disabled = true;
+      status.textContent = result.message;
+      return;
+    }
+
+    if (result.success) {
+      status.className = 'status-msg';
+      status.textContent = '';
+      unlockDashboard();
+    } else {
+      status.className = 'status-msg error';
+      status.textContent = result.message;
+      input.classList.add('error');
+      card.classList.add('shake');
+      setTimeout(() => {
+        input.classList.remove('error');
+        card.classList.remove('shake');
+      }, 400);
+    }
+
+    submitBtn.disabled = false;
+  });
+
+  // Toggle Password Visibility
+  document.getElementById('toggle-eye').addEventListener('click', function() {
+    input.type = input.type === 'password' ? 'text' : 'password';
+  });
+
+  // Logout
+  document.getElementById('logout-btn').addEventListener('click', function() {
+    HCajaAuth.logout();
+    window.location.reload();
+  });
+
+  // Tab Navigation
+  let loadedTabs = { leave: true, issue: false };
+
+  function hideLoading(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  }
+
+  document.getElementById('frame-leave').addEventListener('load', function() {
+    hideLoading('loading-leave');
+  });
+
+  document.getElementById('frame-issue').addEventListener('load', function() {
+    hideLoading('loading-issue');
+  });
+
+  document.getElementById('tabbar').addEventListener('click', function(e) {
+    const btn = e.target.closest('.tab-btn');
+    if (!btn) return;
+
+    const target = btn.getAttribute('data-target');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+    document.getElementById('pane-' + target).classList.add('active');
+
+    if (target === 'issue' && !loadedTabs.issue) {
+      document.getElementById('frame-issue').src = 'issue_sum.html';
+      loadedTabs.issue = true;
+    }
+  });
+
+  // Security: Prevent common attacks (disable DevTools opening)
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'F12' ||
+        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+        (e.ctrlKey && e.key === 'u')) {
+      e.preventDefault();
+    }
+  });
+
+  // Boot application
+  boot();
+</script>
+
+</body>
+</html>
