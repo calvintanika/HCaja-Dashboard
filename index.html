@@ -1,180 +1,327 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>HCIS Dashboard Hub — HCaja | Anteraja</title>
-<link rel="icon" href="data:,">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --navy:#00428D; --navy-dark:#1F3864; --magenta:#E91E8C; --orange:#F4600C;
-    --navy-light:#E8EEF6; --ink:#111827; --muted:#7A8AA3; --line:#E5E7EB;
-    --paper:#FFFFFF; --bg:#F5F7FB; --danger:#DC2626;
-  }
-  *{ box-sizing:border-box; }
-  html, body{ margin:0; padding:0; height:100%; background:var(--bg); font-family:'Inter',sans-serif; color:var(--ink); }
-  #app{ display:flex; flex-direction:column; height:100vh; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HCIS Dashboard Hub — HCaja | Anteraja</title>
+  <link rel="icon" href="data:,">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Shared Styles -->
+  <link rel="stylesheet" href="hcaja-shared.css">
+  
+  <style>
+    /* Login Screen */
+    #login-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(233, 30, 140, 0.1), transparent 45%),
+        radial-gradient(circle at 85% 80%, rgba(244, 96, 12, 0.08), transparent 45%),
+        linear-gradient(160deg, #061B3D 0%, #00428D 55%, #0A2E63 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+    }
 
-  /* ================= LOGIN SCREEN ================= */
-  #login-screen{
-    position:fixed; inset:0; z-index:1000;
-    background:
-      radial-gradient(circle at 15% 20%, rgba(233,30,140,0.10), transparent 45%),
-      radial-gradient(circle at 85% 80%, rgba(244,96,12,0.08), transparent 45%),
-      linear-gradient(160deg, #061B3D 0%, #00428D 55%, #0A2E63 100%);
-    display:flex; align-items:center; justify-content:center;
-    transition:opacity .35s ease, visibility .35s ease;
-  }
-  #login-screen.hidden{ opacity:0; visibility:hidden; pointer-events:none; }
+    #login-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
 
-  .login-card{
-    background:var(--paper); border-radius:14px; padding:38px 34px 30px;
-    box-shadow:0 24px 70px rgba(0,10,40,0.35);
-    max-width:380px; width:92%; text-align:center; position:relative;
-  }
-  .login-card::before{
-    content:''; position:absolute; top:0; left:0; right:0; height:4px; border-radius:14px 14px 0 0;
-    background:linear-gradient(90deg,var(--navy),var(--magenta),var(--orange));
-  }
-  .brand-mark{
-    display:flex; align-items:center; justify-content:center; gap:9px; margin-bottom:6px;
-  }
-  .brand-mark .hc{ font-size:22px; font-weight:800; color:var(--navy); letter-spacing:-0.3px; }
-  .brand-mark .hc span{ color:var(--magenta); }
-  .brand-sub{ font-size:10.5px; color:var(--muted); letter-spacing:1.2px; text-transform:uppercase; margin:0 0 22px; font-weight:600; }
+    .login-card {
+      background: var(--paper);
+      border-radius: 14px;
+      padding: 38px 34px 30px;
+      box-shadow: 0 24px 70px rgba(0, 10, 40, 0.35);
+      max-width: 380px;
+      width: 92%;
+      text-align: center;
+      position: relative;
+    }
 
-  .lock-icon{
-    width:46px; height:46px; margin:0 auto 14px; border-radius:50%;
-    background:var(--navy-light); display:flex; align-items:center; justify-content:center;
-  }
-  .lock-icon svg{ width:22px; height:22px; color:var(--navy); }
+    .login-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      border-radius: 14px 14px 0 0;
+      background: linear-gradient(90deg, var(--navy), var(--magenta), var(--orange));
+    }
 
-  .login-card h2{ margin:0 0 6px; font-size:16.5px; font-weight:700; color:var(--ink); }
-  .login-card p.desc{ margin:0 0 22px; font-size:12.5px; color:var(--muted); line-height:1.5; }
+    .brand-mark {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      margin-bottom: 6px;
+    }
 
-  .password-form{ display:flex; flex-direction:column; gap:10px; }
-  .input-wrap{ position:relative; }
-  .password-form input{
-    width:100%; font-family:'IBM Plex Mono',monospace; font-size:14px; padding:12px 40px 12px 14px;
-    border:1.5px solid var(--line); border-radius:8px; background:#FAFBFD;
-    color:var(--ink); transition:border-color .15s, box-shadow .15s;
-  }
-  .password-form input:focus{
-    outline:none; border-color:var(--navy); box-shadow:0 0 0 3px rgba(0,66,141,0.12); background:#fff;
-  }
-  .password-form input.error{
-    border-color:var(--danger); box-shadow:0 0 0 3px rgba(220,38,38,0.10);
-  }
-  .toggle-eye{
-    position:absolute; right:11px; top:50%; transform:translateY(-50%);
-    cursor:pointer; color:var(--muted); background:none; border:none; padding:4px; display:flex;
-  }
-  .toggle-eye svg{ width:16px; height:16px; }
+    .brand-mark .hc {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--navy);
+      letter-spacing: -0.3px;
+    }
 
-  .password-form button{
-    appearance:none; border:none; cursor:pointer;
-    background:linear-gradient(90deg,var(--navy),#0058B8); color:#fff;
-    font-family:'Inter',sans-serif; font-size:13.5px; font-weight:700;
-    padding:12px 16px; border-radius:8px; transition:opacity .15s, transform .1s;
-    margin-top:4px;
-  }
-  .password-form button:hover:not(:disabled){ opacity:0.92; }
-  .password-form button:active:not(:disabled){ transform:scale(0.98); }
-  .password-form button:disabled{ opacity:0.5; cursor:not-allowed; }
+    .brand-mark .hc span {
+      color: var(--magenta);
+    }
 
-  .status-msg{
-    font-size:11.5px; margin-top:10px; min-height:16px; font-weight:600;
-  }
-  .status-msg.error{ color:var(--danger); }
-  .status-msg.warn{ color:var(--orange); }
+    .brand-sub {
+      font-size: 10.5px;
+      color: var(--muted);
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      margin: 0 0 22px;
+      font-weight: 600;
+    }
 
-  @keyframes shake{
-    0%,100%{ transform:translateX(0); } 20%{ transform:translateX(-6px); }
-    40%{ transform:translateX(6px); } 60%{ transform:translateX(-4px); } 80%{ transform:translateX(4px); }
-  }
-  .shake{ animation:shake 0.35s; }
+    .lock-icon {
+      width: 46px;
+      height: 46px;
+      margin: 0 auto 14px;
+      border-radius: 50%;
+      background: var(--navy-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-  .login-footer{
-    margin-top:20px; padding-top:14px; border-top:1px solid var(--line);
-    font-size:10.5px; color:var(--muted); line-height:1.5;
-  }
-  .login-footer strong{ color:var(--navy); }
+    .lock-icon svg {
+      width: 22px;
+      height: 22px;
+      color: var(--navy);
+    }
 
-  /* ================= MAIN DASHBOARD ================= */
-  #app.locked header, #app.locked nav.tabbar, #app.locked .content{
-    filter:blur(6px); opacity:0.55; pointer-events:none; user-select:none;
-  }
-  header, nav.tabbar, .content{ transition:filter .25s ease, opacity .25s ease; }
+    .login-card h2 {
+      margin: 0 0 6px;
+      font-size: 16.5px;
+    }
 
-  header{
-    background:var(--paper); border-bottom:1px solid var(--line);
-    padding:14px 20px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;
-    box-shadow:0 1px 3px rgba(17,24,39,0.04);
-  }
-  header .logo-mark{ display:flex; align-items:center; gap:8px; flex-shrink:0; }
-  header .logo-mark .hc{ font-size:19px; font-weight:800; color:var(--navy); letter-spacing:-0.3px; }
-  header .logo-mark .hc span{ color:var(--magenta); }
-  header .titles{ margin-right:auto; }
-  header .titles h1{ margin:0; font-size:15px; font-weight:700; color:var(--ink); }
-  header .titles p{ margin:1px 0 0; font-size:11px; color:var(--muted); }
-  header .badge{
-    font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:600;
-    color:#fff; background:linear-gradient(90deg,var(--navy),var(--magenta));
-    padding:4px 10px; border-radius:20px; letter-spacing:0.3px;
-  }
-  header .logout-btn{
-    appearance:none; border:1px solid var(--line); background:#fff; cursor:pointer;
-    font-family:'Inter',sans-serif; font-size:11px; font-weight:600; color:var(--muted);
-    padding:6px 12px; border-radius:6px; display:flex; align-items:center; gap:5px;
-    transition:border-color .15s, color .15s;
-  }
-  header .logout-btn:hover{ border-color:var(--navy); color:var(--navy); }
-  header .logout-btn svg{ width:13px; height:13px; }
+    .login-card p.desc {
+      margin: 0 0 22px;
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
 
-  nav.tabbar{
-    background:var(--paper); border-bottom:1px solid var(--line);
-    display:flex; gap:4px; padding:0 20px; overflow-x:auto;
-  }
-  nav.tabbar button{
-    appearance:none; border:none; background:none; cursor:pointer;
-    font-family:'Inter',sans-serif; font-size:13px; font-weight:600; color:var(--muted);
-    padding:12px 16px; border-bottom:3px solid transparent; white-space:nowrap;
-    display:flex; align-items:center; gap:8px; transition:color .15s, border-color .15s;
-  }
-  nav.tabbar button svg{ width:15px; height:15px; flex-shrink:0; }
-  nav.tabbar button:hover{ color:var(--ink); }
-  nav.tabbar button.active{ color:var(--navy); border-bottom-color:var(--magenta); }
+    .password-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
 
-  .content{ flex:1; position:relative; min-height:0; }
-  .pane{ position:absolute; inset:0; opacity:0; pointer-events:none; transition:opacity .12s; }
-  .pane.active{ opacity:1; pointer-events:auto; }
-  .pane iframe{ width:100%; height:100%; border:none; display:block; background:#fff; }
+    .input-wrap {
+      position: relative;
+    }
 
-  .loading{
-    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    flex-direction:column; gap:10px; background:#fff; font-size:12.5px; color:var(--muted);
-  }
-  .spinner{
-    width:32px; height:32px; border:3px solid var(--line); border-top-color:var(--magenta);
-    border-radius:50%; animation:spin .6s linear infinite;
-  }
-  @keyframes spin{ to{ transform:rotate(360deg); } }
+    .toggle-eye {
+      position: absolute;
+      right: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: var(--muted);
+      background: none;
+      border: none;
+      padding: 4px;
+      display: flex;
+    }
 
-  /* DevTools warning banner */
-  #devtools-warning{
-    position:fixed; top:0; left:0; right:0; z-index:2000; background:var(--danger); color:#fff;
-    font-family:'IBM Plex Mono',monospace; font-size:11.5px; text-align:center; padding:8px;
-    display:none; font-weight:600;
-  }
-</style>
+    .toggle-eye svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .login-footer {
+      margin-top: 20px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+      font-size: 10.5px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .login-footer strong {
+      color: var(--navy);
+    }
+
+    /* Dashboard */
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    #app.locked header,
+    #app.locked nav.tabbar,
+    #app.locked .content {
+      filter: blur(6px);
+      opacity: 0.55;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    header,
+    nav.tabbar,
+    .content {
+      transition: filter 0.25s ease, opacity 0.25s ease;
+    }
+
+    header {
+      background: var(--paper);
+      border-bottom: 1px solid var(--line);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      box-shadow: 0 1px 3px rgba(17, 24, 39, 0.04);
+    }
+
+    header .logo-mark {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    header .logo-mark .hc {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--navy);
+      letter-spacing: -0.3px;
+    }
+
+    header .logo-mark .hc span {
+      color: var(--magenta);
+    }
+
+    header .titles {
+      margin-right: auto;
+    }
+
+    header .titles h1 {
+      font-size: 15px;
+    }
+
+    header .titles p {
+      margin: 1px 0 0;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    header .badge {
+      font-size: 10px;
+    }
+
+    header .logout-btn {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: #fff;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      padding: 6px 12px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    header .logout-btn:hover {
+      border-color: var(--navy);
+      color: var(--navy);
+    }
+
+    header .logout-btn svg {
+      width: 13px;
+      height: 13px;
+    }
+
+    nav.tabbar {
+      background: var(--paper);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      gap: 4px;
+      padding: 0 20px;
+      overflow-x: auto;
+    }
+
+    nav.tabbar button {
+      appearance: none;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      padding: 12px 16px;
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    nav.tabbar button svg {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+    }
+
+    nav.tabbar button:hover {
+      color: var(--ink);
+    }
+
+    nav.tabbar button.active {
+      color: var(--navy);
+      border-bottom-color: var(--magenta);
+    }
+
+    .content {
+      flex: 1;
+      position: relative;
+      min-height: 0;
+    }
+
+    .pane {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.12s;
+    }
+
+    .pane.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .pane iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+      background: #fff;
+    }
+  </style>
 </head>
 <body>
 
-<div id="devtools-warning">⚠️ Developer Tools terdeteksi aktif — akses dan aktivitas pada halaman ini tercatat.</div>
-
-<!-- ================= LOGIN SCREEN ================= -->
+<!-- LOGIN SCREEN -->
 <div id="login-screen">
   <div class="login-card">
     <div class="brand-mark"><span class="hc">HCaja<span>.</span></span></div>
@@ -194,10 +341,13 @@
       <div class="input-wrap">
         <input type="password" id="password-input" placeholder="Masukkan password..." autocomplete="off" autofocus />
         <button type="button" class="toggle-eye" id="toggle-eye" tabindex="-1">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
         </button>
       </div>
-      <button type="submit" id="submit-btn">Masuk ke Dashboard</button>
+      <button type="submit" id="submit-btn" class="primary">Masuk ke Dashboard</button>
       <div class="status-msg" id="status-msg"></div>
     </form>
 
@@ -208,7 +358,7 @@
   </div>
 </div>
 
-<!-- ================= MAIN DASHBOARD ================= -->
+<!-- MAIN DASHBOARD -->
 <div id="app" class="locked">
   <header>
     <div class="logo-mark"><span class="hc">HCaja<span>.</span></span></div>
@@ -218,18 +368,31 @@
     </div>
     <span class="badge">HCIS · HCaja</span>
     <button class="logout-btn" id="logout-btn" title="Keluar dari sesi">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
       Keluar
     </button>
   </header>
 
   <nav class="tabbar" id="tabbar">
     <button class="tab-btn active" data-target="leave">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
       Leave Report
     </button>
     <button class="tab-btn" data-target="issue">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
       Support Ticket
     </button>
   </nav>
@@ -246,213 +409,153 @@
   </div>
 </div>
 
+<!-- Auth Library -->
+<script src="hcaja-auth.js"></script>
+
+<!-- Main Application -->
 <script>
-/* ==========================================================================
-   HCIS AUTH — hardened client-side authentication (Opsi 1)
-   Baca SECURITY_GUIDE.md untuk penjelasan lengkap & batasan setiap layer.
-   ========================================================================== */
+  // Initialize HCaja Auth
+  HCajaAuth.init({
+    passwordHash: 'f92b9e51e7eb6f23e893a8b7abb6e66ed71dc4e9b99f1e4a1cea43f2c6e03c98',
+    sessionSecret: 'ed1068cb08e146daa58613083eda8899abb8a2c7a3c54347af53773d7168ec90'
+  });
 
-// -------- 1. KONFIGURASI (WAJIB DIUBAH sebelum deploy) --------------------
-// Hash SHA-256 dari password. JANGAN taruh password plain-text di sini.
-// Cara generate hash baru ada di SECURITY_GUIDE.md.
-var PASSWORD_HASH = '09db4543b26033fab5f872e5be8886d49e08eaeb2697e83b79b7a65394a390c0';
+  // UI Elements
+  const loginScreen = document.getElementById('login-screen');
+  const app = document.getElementById('app');
+  const form = document.getElementById('password-form');
+  const input = document.getElementById('password-input');
+  const status = document.getElementById('status-msg');
+  const card = document.querySelector('.login-card');
+  const submitBtn = document.getElementById('submit-btn');
 
-// Harus IDENTIK dengan SESSION_SECRET di leave_report.html & issue_sum.html
-var SESSION_SECRET = 'ed1068cb08e146daa58613083eda8899abb8a2c7a3c54347af53773d7168ec90';
-
-var SESSION_KEY      = 'hcaja_session';
-var ATTEMPTS_KEY      = 'hcaja_attempts';
-var LOCK_UNTIL_KEY    = 'hcaja_lock_until';
-var SESSION_MAX_AGE   = 8 * 60 * 60 * 1000; // 8 jam
-
-// -------- 2. HELPER: SHA-256 via Web Crypto API ---------------------------
-async function sha256(str){
-  var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-}
-function randomToken(){
-  var arr = new Uint8Array(16);
-  crypto.getRandomValues(arr);
-  return Array.from(arr).map(b => b.toString(16).padStart(2,'0')).join('');
-}
-
-// -------- 3. RATE LIMITING (escalating lockout) ----------------------------
-function getAttempts(){ return parseInt(sessionStorage.getItem(ATTEMPTS_KEY) || '0', 10); }
-function setAttempts(n){ sessionStorage.setItem(ATTEMPTS_KEY, String(n)); }
-function getLockUntil(){ return parseInt(sessionStorage.getItem(LOCK_UNTIL_KEY) || '0', 10); }
-function setLockUntil(ts){ sessionStorage.setItem(LOCK_UNTIL_KEY, String(ts)); }
-
-function lockDurationFor(attempts){
-  if(attempts >= 12) return 10 * 60 * 1000; // 10 menit
-  if(attempts >= 8)  return 2 * 60 * 1000;  // 2 menit
-  if(attempts >= 5)  return 30 * 1000;      // 30 detik
-  return 0;
-}
-
-var lockInterval = null;
-function checkLockState(){
-  var lockUntil = getLockUntil();
-  var remaining = lockUntil - Date.now();
-  var input = document.getElementById('password-input');
-  var btn = document.getElementById('submit-btn');
-  var status = document.getElementById('status-msg');
-
-  if(remaining > 0){
-    input.disabled = true; btn.disabled = true;
-    status.className = 'status-msg warn';
-    var render = function(){
-      var s = Math.ceil((getLockUntil() - Date.now())/1000);
-      if(s <= 0){
-        clearInterval(lockInterval);
-        input.disabled = false; btn.disabled = false;
-        status.textContent = '';
-        status.className = 'status-msg';
-      } else {
-        status.textContent = 'Terlalu banyak percobaan. Coba lagi dalam ' + s + ' detik.';
+  // Boot: Check existing session
+  async function boot() {
+    if (await HCajaAuth.checkSession()) {
+      unlockDashboard();
+    } else {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('blocked') === '1') {
+        status.className = 'status-msg warn';
+        status.textContent = 'Sesi tidak valid — silakan login kembali.';
       }
-    };
-    render();
-    clearInterval(lockInterval);
-    lockInterval = setInterval(render, 1000);
-    return true;
-  }
-  return false;
-}
-
-// -------- 4. SESSION ISSUANCE & VALIDATION ---------------------------------
-async function issueSession(){
-  var token = randomToken();
-  var proof = await sha256(token + ':' + SESSION_SECRET);
-  var session = { token: token, proof: proof, issuedAt: Date.now() };
-  sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
-  sessionStorage.removeItem(ATTEMPTS_KEY);
-  sessionStorage.removeItem(LOCK_UNTIL_KEY);
-}
-
-async function isSessionValid(){
-  try{
-    var raw = sessionStorage.getItem(SESSION_KEY);
-    if(!raw) return false;
-    var s = JSON.parse(raw);
-    if(!s.token || !s.proof || !s.issuedAt) return false;
-    if(Date.now() - s.issuedAt > SESSION_MAX_AGE) return false;
-    var expected = await sha256(s.token + ':' + SESSION_SECRET);
-    return expected === s.proof;
-  } catch(e){ return false; }
-}
-
-// -------- 5. UI WIRING -------------------------------------------------
-var loginScreen = document.getElementById('login-screen');
-var app = document.getElementById('app');
-var form = document.getElementById('password-form');
-var input = document.getElementById('password-input');
-var status = document.getElementById('status-msg');
-var card = document.querySelector('.login-card');
-
-function unlockDashboard(){
-  loginScreen.classList.add('hidden');
-  app.classList.remove('locked');
-}
-
-async function boot(){
-  if(await isSessionValid()){
-    unlockDashboard();
-  } else {
-    checkLockState();
-    var params = new URLSearchParams(window.location.search);
-    if(params.get('blocked') === '1'){
-      status.className = 'status-msg warn';
-      status.textContent = 'Sesi tidak valid — silakan login kembali.';
     }
   }
-}
-boot();
 
-form.addEventListener('submit', async function(e){
-  e.preventDefault();
-  if(checkLockState()) return;
+  function unlockDashboard() {
+    loginScreen.classList.add('hidden');
+    app.classList.remove('locked');
+  }
 
-  var val = input.value;
-  input.value = '';
-  var hash = await sha256(val);
+  // Form Submit
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    submitBtn.disabled = true;
 
-  if(hash === PASSWORD_HASH){
-    status.className = 'status-msg';
-    status.textContent = '';
-    await issueSession();
-    unlockDashboard();
-  } else {
-    var attempts = getAttempts() + 1;
-    setAttempts(attempts);
-    var lockMs = lockDurationFor(attempts);
-    if(lockMs > 0){
-      setLockUntil(Date.now() + lockMs);
-      checkLockState();
+    const password = input.value;
+    input.value = '';
+
+    const result = await HCajaAuth.validatePassword(password);
+
+    if (result.locked) {
+      status.className = 'status-msg warn';
+      const seconds = Math.ceil(result.remainingMs / 1000);
+      let countdown = seconds;
+
+      const timer = setInterval(() => {
+        if (countdown <= 0) {
+          clearInterval(timer);
+          status.textContent = '';
+          submitBtn.disabled = false;
+          input.disabled = false;
+        } else {
+          status.textContent = `Terlalu banyak percobaan. Coba lagi dalam ${countdown} detik.`;
+          countdown--;
+        }
+      }, 1000);
+
+      input.disabled = true;
+      status.textContent = result.message;
+      return;
+    }
+
+    if (result.success) {
+      status.className = 'status-msg';
+      status.textContent = '';
+      unlockDashboard();
     } else {
       status.className = 'status-msg error';
-      status.textContent = 'Password salah. Percobaan ke-' + attempts + '.';
+      status.textContent = result.message;
+      input.classList.add('error');
+      card.classList.add('shake');
+      setTimeout(() => {
+        input.classList.remove('error');
+        card.classList.remove('shake');
+      }, 400);
     }
-    input.classList.add('error');
-    card.classList.add('shake');
-    setTimeout(function(){
-      input.classList.remove('error');
-      card.classList.remove('shake');
-    }, 400);
+
+    submitBtn.disabled = false;
+  });
+
+  // Toggle Password Visibility
+  document.getElementById('toggle-eye').addEventListener('click', function() {
+    input.type = input.type === 'password' ? 'text' : 'password';
+  });
+
+  // Logout
+  document.getElementById('logout-btn').addEventListener('click', function() {
+    HCajaAuth.logout();
+    window.location.reload();
+  });
+
+  // Tab Navigation
+  let loadedTabs = { leave: true, issue: false };
+
+  function hideLoading(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
   }
-});
 
-document.getElementById('toggle-eye').addEventListener('click', function(){
-  input.type = input.type === 'password' ? 'text' : 'password';
-});
+  document.getElementById('frame-leave').addEventListener('load', function() {
+    hideLoading('loading-leave');
+  });
 
-document.getElementById('logout-btn').addEventListener('click', function(){
-  sessionStorage.removeItem(SESSION_KEY);
-  window.location.reload();
-});
+  document.getElementById('frame-issue').addEventListener('load', function() {
+    hideLoading('loading-issue');
+  });
 
-// -------- 6. DETERRENTS (bukan proteksi sungguhan — lihat SECURITY_GUIDE.md) ----
-document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
-document.addEventListener('keydown', function(e){
-  if(e.key === 'F12' ||
-     (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
-     (e.ctrlKey && e.key === 'u')){
-    e.preventDefault();
-  }
-});
+  document.getElementById('tabbar').addEventListener('click', function(e) {
+    const btn = e.target.closest('.tab-btn');
+    if (!btn) return;
 
-// Deteksi DevTools terbuka (heuristik, best-effort, bisa dilewati)
-(function(){
-  var threshold = 160;
-  var warned = false;
-  setInterval(function(){
-    var isOpen = (window.outerWidth - window.innerWidth > threshold) ||
-                 (window.outerHeight - window.innerHeight > threshold);
-    document.getElementById('devtools-warning').style.display = isOpen ? 'block' : 'none';
-  }, 800);
-})();
+    const target = btn.getAttribute('data-target');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
 
-console.log('%cSTOP', 'color:#DC2626;font-size:40px;font-weight:bold;');
-console.log('%cHalaman ini berisi data internal HCIS PT Tri Adi Bersama. Akses tidak sah dilarang.', 'font-size:13px;');
+    document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+    document.getElementById('pane-' + target).classList.add('active');
 
-// -------- 7. TAB NAVIGATION --------------------------------------------
-var loadedTabs = { leave: true, issue: false };
-function hideLoading(id){ var el = document.getElementById(id); if(el) el.style.display = 'none'; }
-document.getElementById('frame-leave').addEventListener('load', function(){ hideLoading('loading-leave'); });
-document.getElementById('frame-issue').addEventListener('load', function(){ hideLoading('loading-issue'); });
+    if (target === 'issue' && !loadedTabs.issue) {
+      document.getElementById('frame-issue').src = 'issue_sum.html';
+      loadedTabs.issue = true;
+    }
+  });
 
-document.getElementById('tabbar').addEventListener('click', function(e){
-  var btn = e.target.closest('.tab-btn');
-  if(!btn) return;
-  var target = btn.getAttribute('data-target');
-  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
-  btn.classList.add('active');
-  document.querySelectorAll('.pane').forEach(function(p){ p.classList.remove('active'); });
-  document.getElementById('pane-' + target).classList.add('active');
-  if(target === 'issue' && !loadedTabs.issue){
-    document.getElementById('frame-issue').src = 'issue_sum.html';
-    loadedTabs.issue = true;
-  }
-});
+  // Security: Prevent common attacks
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'F12' ||
+        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+        (e.ctrlKey && e.key === 'u')) {
+      e.preventDefault();
+    }
+  });
+
+  console.log('%cSTOP', 'color:#DC2626;font-size:40px;font-weight:bold;');
+  console.log('%cHalaman ini berisi data internal HCIS PT Tri Adi Bersama. Akses tidak sah dilarang.', 'font-size:13px;');
+
+  // Boot application
+  boot();
 </script>
 
 </body>
