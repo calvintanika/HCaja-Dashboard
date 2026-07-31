@@ -6,6 +6,36 @@
 <title>HCaja Leave Report — HCIS Anteraja</title>
 <link rel="icon" href="data:,">
 
+<!-- ===== HCIS AUTH GUARD — jangan hapus / pindah, harus paling atas ===== -->
+<script>
+(function(){
+  var SESSION_SECRET = 'ed1068cb08e146daa58613083eda8899abb8a2c7a3c54347af53773d7168ec90';
+  var SESSION_KEY     = 'hcaja_session';
+  var SESSION_MAX_AGE = 8 * 60 * 60 * 1000;
+  async function sha256(str){
+    var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+  async function isSessionValid(){
+    try{
+      var raw = sessionStorage.getItem(SESSION_KEY);
+      if(!raw) return false;
+      var s = JSON.parse(raw);
+      if(!s.token || !s.proof || !s.issuedAt) return false;
+      if(Date.now() - s.issuedAt > SESSION_MAX_AGE) return false;
+      var expected = await sha256(s.token + ':' + SESSION_SECRET);
+      return expected === s.proof;
+    } catch(e){ return false; }
+  }
+  document.documentElement.style.visibility = 'hidden';
+  isSessionValid().then(function(valid){
+    if(valid){ document.documentElement.style.visibility = 'visible'; }
+    else { window.location.replace('index.html?blocked=1'); }
+  });
+})();
+</script>
+<!-- ===== END AUTH GUARD ===== -->
+
 <!-- React (UMD build) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js" crossorigin></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js" crossorigin></script>
@@ -48,9 +78,33 @@ const { useState, useEffect, useCallback, useMemo, useRef } = React;
    Data source: "Report Tasklist General" tab, published to web as CSV
    (File → Share → Publish to web). Columns match the HCaja export format
    exactly, incl. "Status Pegawai" — no restructuring needed. */
-const GOOGLE_SHEET_CSV_URL =
-   "https://hcaja-api.calvintanika.workers.dev/?key=123";
-  /*"https://hcaja-leave-report.your-worker.workers.dev/";*/
+const GOOGLE_SHEET_CSV_URL = "https://hcaja-api.calvintanika.workers.dev/";
+
+// HARUS identik dengan SESSION_SECRET di index.html dan HCAJA_SESSION_SECRET
+// di environment variable Cloudflare Worker. Ganti ketiganya bersamaan.
+const HCAJA_SESSION_SECRET = 'REPLACE_WITH_RANDOM_SECRET_STRING_2026';
+
+/* ---------- HMAC-SHA256 signing (menggantikan static ?key=123) ----------
+   Membuat tanda tangan yang berbeda tiap request dan expired dalam 5 menit
+   di sisi Worker. Mencegah URL yang ter-capture (network tab, browser
+   history, proxy log) dipakai ulang untuk akses data secara permanen. */
+async function hmacSha256Hex(secret, message){
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  );
+  const sigBuf = await crypto.subtle.sign('HMAC', key, enc.encode(message));
+  return Array.from(new Uint8Array(sigBuf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function buildSignedUrl(baseUrl){
+  const ts = Date.now().toString();
+  const sig = await hmacSha256Hex(HCAJA_SESSION_SECRET, ts);
+  const u = new URL(baseUrl);
+  u.searchParams.set('ts', ts);
+  u.searchParams.set('sig', sig);
+  return u.toString();
+}
 
 /* ---------- fetch + parse the published Google Sheet ---------- */
 async function fetchSheetRows(url) {
@@ -60,7 +114,8 @@ async function fetchSheetRows(url) {
   // inconsistently (different edge nodes hold different snapshots). Appending a
   // unique query param on every call forces Google to treat each refresh as a
   // distinct URL, which reliably bypasses that edge cache too.
-  const bustedUrl = url + (url.includes("?") ? "&" : "?") + "cb=" + Date.now();
+  const signedUrl = await buildSignedUrl(url);
+  const bustedUrl = signedUrl + "&cb=" + Date.now();
   const res = await fetch(bustedUrl, { cache: "no-store" });
   if (!res.ok) throw new Error(`HTTP ${res.status} saat mengambil data dari Google Sheets`);
   const csvText = await res.text();
