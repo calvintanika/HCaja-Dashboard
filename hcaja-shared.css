@@ -1,0 +1,309 @@
+/**
+ * HCaja Shared Styles
+ * Brand colors, typography, components
+ */
+
+:root {
+  /* Colors */
+  --navy: #00428D;
+  --navy-dark: #1F3864;
+  --magenta: #E91E8C;
+  --orange: #F4600C;
+  --navy-light: #E8EEF6;
+  --ink: #111827;
+  --muted: #7A8AA3;
+  --line: #E5E7EB;
+  --paper: #FFFFFF;
+  --bg: #F5F7FB;
+  --danger: #DC2626;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg);
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Typography */
+h1,
+h2,
+h3 {
+  font-weight: 700;
+  margin: 0;
+}
+
+h1 {
+  font-size: 24px;
+}
+
+h2 {
+  font-size: 20px;
+}
+
+h3 {
+  font-size: 18px;
+}
+
+p {
+  margin: 0.5em 0;
+}
+
+/* Links */
+a {
+  color: var(--navy);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Forms */
+input[type="password"],
+input[type="text"],
+textarea,
+select {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  background: #FAFBFD;
+  color: var(--ink);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+input[type="password"]:focus,
+input[type="text"]:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(0, 66, 141, 0.12);
+  background: #fff;
+}
+
+input[type="password"].error,
+input[type="text"].error {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+/* Buttons */
+button {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  padding: 12px 16px;
+  border-radius: 8px;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+button.primary {
+  background: linear-gradient(90deg, var(--navy), #0058B8);
+  color: #fff;
+}
+
+button.primary:hover:not(:disabled) {
+  opacity: 0.92;
+}
+
+button.primary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+button.primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button.secondary {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--muted);
+}
+
+button.secondary:hover {
+  border-color: var(--navy);
+  color: var(--navy);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Cards */
+.card {
+  background: var(--paper);
+  border: 0.5px solid var(--line);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 1px 3px rgba(17, 24, 39, 0.04);
+}
+
+/* Badges */
+.badge {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(90deg, var(--navy), var(--magenta));
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* Status Messages */
+.status-msg {
+  font-size: 11.5px;
+  font-weight: 600;
+  min-height: 16px;
+  margin-top: 10px;
+}
+
+.status-msg.error {
+  color: var(--danger);
+}
+
+.status-msg.warn {
+  color: var(--orange);
+}
+
+.status-msg.success {
+  color: #10b981;
+}
+
+/* Animations */
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px);
+  }
+  40% {
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+.shake {
+  animation: shake 0.35s;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--line);
+  border-top-color: var(--magenta);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+/* Loading State */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  padding: 2rem;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+/* Utility Classes */
+.text-primary {
+  color: var(--ink);
+}
+
+.text-secondary {
+  color: var(--muted);
+}
+
+.text-danger {
+  color: var(--danger);
+}
+
+.text-navy {
+  color: var(--navy);
+}
+
+.text-magenta {
+  color: var(--magenta);
+}
+
+.text-orange {
+  color: var(--orange);
+}
+
+.mt-1 {
+  margin-top: 0.5rem;
+}
+
+.mt-2 {
+  margin-top: 1rem;
+}
+
+.mb-1 {
+  margin-bottom: 0.5rem;
+}
+
+.mb-2 {
+  margin-bottom: 1rem;
+}
+
+.gap-1 {
+  gap: 0.5rem;
+}
+
+.gap-2 {
+  gap: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 20px;
+  }
+
+  h2 {
+    font-size: 18px;
+  }
+
+  h3 {
+    font-size: 16px;
+  }
+
+  body {
+    font-size: 14px;
+  }
+}
