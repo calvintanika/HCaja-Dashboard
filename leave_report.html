@@ -928,15 +928,11 @@ function LeaveReportScroll() {
     const dates = data.map((r) => r._date).filter(Boolean);
     setRows(data);
     setFileName(label);
-    if (dates.length) {
-      let minDate = dates[0], maxDate = dates[0];
-      for (let i = 1; i < dates.length; i++) {
-        if (dates[i] < minDate) minDate = dates[i];
-        if (dates[i] > maxDate) maxDate = dates[i];
-      }
-      setStart(minDate);
-      setEnd(maxDate);
-    }
+    // Default periode: 1 Januari 2026 s/d tanggal hari ini
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+    setStart(new Date(2026, 0, 1));
+    setEnd(today);
     return true;
   }, []);
 
@@ -1126,11 +1122,9 @@ function LeaveReportScroll() {
         <div style={{ color: C.ink, fontWeight: 600, fontSize: 13.5, marginRight: "auto", minWidth: 150 }}>
           Leave Request Auto-Report
           <div style={{ color: C.sub, fontWeight: 400, fontSize: 10.5 }}>
-            {fileName} · {num(rows.length)} baris / rows
+            Log HCaja · Leave Request Tracking · {num(rows.length)} baris
             {fetchedAt && (
-              <span style={{ color: C.green }}>
-                {" "}· live dari Google Sheets, diambil {fmtDateTime(fetchedAt)}
-              </span>
+              <span style={{ marginLeft: 6 }}>Sinkron: {fmtDateTime(fetchedAt)}</span>
             )}
           </div>
         </div>
@@ -1484,9 +1478,6 @@ function LeaveReportScroll() {
             padding: "20px 0 4px",
           }}
         >
-          <div style={{ fontSize: 10, letterSpacing: 1.5, color: C.disabled, fontWeight: 600 }}>
-            APLIKASI & PENYEDIA DATA / APP &amp; DATA SOURCE
-          </div>
           <div style={{ display: "flex", alignItems: "center", gap: 28, flexWrap: "wrap", justifyContent: "center" }}>
             <img src={LOGO_HCAJA} alt="HCaja" style={{ height: 22, width: "auto", opacity: 0.85 }} />
             <img src={LOGO_ANTERAJA} alt="Anteraja" style={{ height: 20, width: "auto", opacity: 0.85 }} />
@@ -1494,9 +1485,6 @@ function LeaveReportScroll() {
           </div>
         </div>
 
-        <div style={{ textAlign: "center", fontSize: 10.5, color: C.sub, letterSpacing: 0.5, fontFamily: FONT }}>
-          HCaja Leave Report · Sumber / Source: {fileName} · {periodLabel}
-        </div>
       </div>
     </div>
   );
