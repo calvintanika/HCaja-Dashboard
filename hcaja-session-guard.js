@@ -46,7 +46,7 @@
     if (valid) {
       document.documentElement.style.visibility = 'visible';
     } else {
-      window.location.replace('index_new.html?blocked=1');
+      window.location.replace('index.html?blocked=1');
     }
   });
 })();
