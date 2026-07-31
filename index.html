@@ -406,7 +406,7 @@
   <div class="content">
     <div class="pane active" id="pane-leave">
       <div class="loading" id="loading-leave"><div class="spinner"></div>Memuat Leave Report…</div>
-      <iframe id="frame-leave" src="leave_report.html" title="HCaja Leave Report"></iframe>
+      <iframe id="frame-leave" title="HCaja Leave Report"></iframe>
     </div>
     <div class="pane" id="pane-issue">
       <div class="loading" id="loading-issue"><div class="spinner"></div>Memuat Support Ticket Dashboard…</div>
@@ -438,6 +438,11 @@
   // Boot: Check existing session
   async function boot() {
     if (await HCajaAuth.checkSession()) {
+      // Lazy load Leave Report
+      if (!document.getElementById('frame-leave').src) {
+        document.getElementById('frame-leave').src = 'leave_report.html';
+        loadedTabs.leave = true;
+      }
       unlockDashboard();
     } else {
       const params = new URLSearchParams(window.location.search);
@@ -451,6 +456,11 @@
   function unlockDashboard() {
     loginScreen.classList.add('hidden');
     app.classList.remove('locked');
+    // Lazy load Leave Report setelah login
+    if (!document.getElementById('frame-leave').src) {
+      document.getElementById('frame-leave').src = 'leave_report.html';
+      loadedTabs.leave = true;
+    }
   }
 
   // Form Submit
