@@ -1115,9 +1115,8 @@ function LeaveReportScroll() {
         <div style={{ color: C.ink, fontWeight: 600, fontSize: 13.5, marginRight: "auto", minWidth: 150 }}>
           Leave Request Auto-Report
           <div style={{ color: C.sub, fontWeight: 400, fontSize: 10.5 }}>
-            Log HCaja · Leave Request Tracking · {num(rows.length)} baris
             {fetchedAt && (
-              <span style={{ marginLeft: 6 }}>Sinkron: {fmtDateTime(fetchedAt)}</span>
+              <span>Sinkron: {fmtDateTime(fetchedAt)}</span>
             )}
           </div>
         </div>
